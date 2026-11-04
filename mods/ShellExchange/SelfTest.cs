@@ -31,6 +31,8 @@ namespace CCFR.ShellExchange
             int shells = glov.cc.playerShells;
             int gain = shells * ExchangeUi.GoldPerShell;
 
+            Diag.Ui();
+
             Plugin.Log.LogInfo($"[SELFTEST] before: gold={glov.cc.playerGold} shells={glov.cc.playerShells} gain={gain}");
 
             bool accepted = false;

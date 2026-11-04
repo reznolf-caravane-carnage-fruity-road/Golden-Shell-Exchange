@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -91,6 +92,8 @@ namespace CCFR.ShellExchange
                 Plugin.Log.LogError("Could not find rect_holder/BTN in the cloned settings button");
             }
 
+            BuildGlowAndBounce(plate);
+
             var driver = menu.gameObject.GetComponent<ShellExchangeDriver>();
             if (driver == null)
             {
@@ -137,6 +140,45 @@ namespace CCFR.ShellExchange
             }
 
             _visualApplied = true;
+        }
+
+        private static void BuildGlowAndBounce(Transform plate)
+        {
+            Transform holder = _button.transform.Find("rect_holder");
+            if (holder == null || plate == null)
+            {
+                return;
+            }
+
+            Transform previous = holder.Find("ShellGlow");
+            if (previous != null)
+            {
+                UnityEngine.Object.Destroy(previous.gameObject);
+            }
+
+            RectTransform glowRt = UiFactory.Panel("ShellGlow", holder);
+            glowRt.sizeDelta = new Vector2(1.5f, 1.3f);
+            glowRt.anchoredPosition = Vector2.zero;
+
+            var glowImage = glowRt.gameObject.AddComponent<Image>();
+            glowImage.sprite = SpriteUtil.ShellSprite();
+            glowImage.preserveAspect = true;
+            glowImage.raycastTarget = false;
+            glowImage.color = new Color(1f, 1f, 1f, 0f);
+
+            int uiLayer = LayerMask.NameToLayer("UI");
+            if (uiLayer >= 0)
+            {
+                glowRt.gameObject.layer = uiLayer;
+            }
+
+            var glowCanvas = glowRt.gameObject.AddComponent<Canvas>();
+            glowCanvas.overrideSorting = true;
+            glowCanvas.sortingLayerName = "GUI";
+            glowCanvas.sortingOrder = 2;
+
+            var bounce = plate.GetComponent<ClickBounce>() ?? plate.gameObject.AddComponent<ClickBounce>();
+            bounce.Bind(holder, glowImage);
         }
 
         private static void StripInteractions()
@@ -196,6 +238,20 @@ namespace CCFR.ShellExchange
             int gain = (int)Math.Min(requested, Math.Max(0L, headroom));
 
             _busy = true;
+            _menu.StartCoroutine(ShowConfirmDelayed(shells, gain));
+        }
+
+        private static IEnumerator ShowConfirmDelayed(int shells, int gain)
+        {
+            // Let the press glow / bounce play before the dialog covers the button.
+            yield return new WaitForSecondsRealtime(0.14f);
+
+            if (_menu == null || glov.cc == null)
+            {
+                _busy = false;
+                yield break;
+            }
+
             ConfirmDialog.Show(_menu, shells, gain, confirmed =>
             {
                 if (confirmed && _menu != null)

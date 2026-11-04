@@ -90,6 +90,19 @@ namespace CCFR.ShellExchange
             colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
             button.colors = colors;
 
+            // White flash overlay used as the "light up" part of the click bounce.
+            RectTransform glow = Panel("Glow", rt);
+            Stretch(glow);
+            var glowImage = glow.gameObject.AddComponent<Image>();
+            glowImage.sprite = sprite;
+            glowImage.type = image.type;
+            glowImage.color = new Color(1f, 1f, 1f, 0f);
+            glowImage.raycastTarget = false;
+            glow.SetAsFirstSibling();
+
+            var bounce = rt.gameObject.AddComponent<ClickBounce>();
+            bounce.Bind(rt, glowImage);
+
             TextMeshProUGUI txt = Text(
                 name + "Label",
                 rt,
