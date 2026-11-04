@@ -80,7 +80,9 @@ namespace CCFR.ShellExchange
             panelImage.raycastTarget = true;
 
             TMP_FontAsset font = menu.goldTXT != null ? menu.goldTXT.font : null;
-            Material material = menu.goldTXT != null ? menu.goldTXT.fontSharedMaterial : null;
+            Material material = BuildTextMaterial(
+                font,
+                menu.goldTXT != null ? menu.goldTXT.fontSharedMaterial : null);
 
             UiFactory.Text(
                 "Title",
@@ -104,7 +106,7 @@ namespace CCFR.ShellExchange
                 new Vector2(760f, 160f),
                 new Vector2(0f, 40f));
 
-            TextMeshProUGUI rate = UiFactory.Text(
+            UiFactory.Text(
                 "Rate",
                 panel,
                 font,
@@ -114,7 +116,6 @@ namespace CCFR.ShellExchange
                 TextAlignmentOptions.Center,
                 new Vector2(700f, 50f),
                 new Vector2(0f, -60f));
-            rate.color = new Color(0.95f, 0.85f, 0.55f, 1f);
 
             UiFactory.Button(
                 "Yes",
@@ -142,6 +143,35 @@ namespace CCFR.ShellExchange
                 $"Confirm dialog built (panel='{(panelSprite != null ? panelSprite.name : "MISSING")}', " +
                 $"button='{(SpriteUtil.Named("settings-button1") != null ? "settings-button1" : "fallback")}', " +
                 $"font='{(font != null ? font.name : "MISSING")}')");
+        }
+
+        private static Material BuildTextMaterial(TMP_FontAsset font, Material source)
+        {
+            Material baseMaterial = source != null ? source : (font != null ? font.material : null);
+            if (baseMaterial == null)
+            {
+                return null;
+            }
+
+            var material = new Material(baseMaterial)
+            {
+                name = "CCFR_ShellExchange_Text"
+            };
+
+            material.SetColor("_FaceColor", Color.black);
+            material.SetColor("_OutlineColor", Color.white);
+            material.SetFloat("_OutlineWidth", 0.22f);
+            material.SetFloat("_OutlineSoftness", 0f);
+            material.EnableKeyword("OUTLINE_ON");
+
+            Color outlineColor = material.GetColor("_OutlineColor");
+            float outlineWidth = material.GetFloat("_OutlineWidth");
+            bool outlineOn = material.IsKeywordEnabled("OUTLINE_ON");
+
+            Plugin.Log.LogInfo(
+                $"Dialog text material built: outlineColor={outlineColor} width={outlineWidth} outlineOn={outlineOn}");
+
+            return material;
         }
 
         internal static void CloseForTest(bool result)

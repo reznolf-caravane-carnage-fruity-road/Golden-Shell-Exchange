@@ -96,9 +96,9 @@ namespace CCFR.ShellExchange
                 font,
                 material,
                 label,
-                34f,
+                50f,
                 TextAlignmentOptions.Center,
-                new Vector2(size.x - 24f, size.y - 12f),
+                new Vector2(size.x - 24f, size.y - 10f),
                 Vector2.zero);
             txt.fontStyle = FontStyles.Bold;
 
