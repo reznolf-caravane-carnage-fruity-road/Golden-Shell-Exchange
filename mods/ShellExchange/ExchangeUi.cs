@@ -12,6 +12,9 @@ namespace CCFR.ShellExchange
 
         private const float ArtVisibleHeight = 1.10f;
 
+        // Small extra gap to the right of the settings button.
+        private const float RightNudge = 0.28f;
+
         internal static float HorizontalOffset = 1.95f;
 
         private static StartMenuScript _menu;
@@ -166,7 +169,7 @@ namespace CCFR.ShellExchange
                 }
             }
 
-            HorizontalOffset = 0.61f + size.x * 0.5f + 0.06f;
+            HorizontalOffset = 0.61f + size.x * 0.5f + 0.06f + RightNudge;
             _visualApplied = true;
         }
 
