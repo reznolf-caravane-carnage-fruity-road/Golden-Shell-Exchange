@@ -82,7 +82,6 @@ pwsh scripts/deploy.ps1
   your local one, restore from `backups/`.
 
 ## How it works (short version)
-
 | Piece | Game API used |
 |---|---|
 | Button placement | clone of `StartMenuScript.pauseSettingsBtn_obj`, offset +1.95 units |
@@ -96,6 +95,15 @@ pwsh scripts/deploy.ps1
 
 More detail in [`docs/game-notes.md`](docs/game-notes.md) and
 [`docs/ui-map.md`](docs/ui-map.md).
+
+## Asset copies
+
+Extracted game art lives in `icons/`:
+
+- `icons/shells/` — all shell sprites, including `golden_shell.png` (used by the mod)
+- `icons/money/` — all money sprites, including `moneyicon.png` (used by the mod)
+
+See `icons/README.md` for the full list.
 
 ## Developer self-test
 

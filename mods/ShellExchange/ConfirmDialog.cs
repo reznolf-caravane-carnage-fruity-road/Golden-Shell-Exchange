@@ -195,21 +195,45 @@ namespace CCFR.ShellExchange
 
             var layout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
             layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.spacing = 20f;
+            layout.spacing = 26f;
             layout.childControlWidth = false;
             layout.childControlHeight = false;
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = false;
 
-            AddIcon(row, SpriteUtil.ShellSprite(), 78f, 68f);
-            AddText(row, font, material, "1", 60f);
-            AddText(row, font, material, "=", 44f);
-            AddIcon(row, CashIcon(menu), 76f, 76f);
-            AddText(row, font, material, "1,000", 190f);
+            // Left group: shell icon + "1" kept tight together.
+            RectTransform left = UiFactory.Panel("Left", row);
+            left.sizeDelta = new Vector2(124f, 100f);
+            var leftLayout = left.gameObject.AddComponent<HorizontalLayoutGroup>();
+            leftLayout.childAlignment = TextAnchor.MiddleCenter;
+            leftLayout.spacing = 2f;
+            leftLayout.childControlWidth = false;
+            leftLayout.childControlHeight = false;
+            leftLayout.childForceExpandWidth = false;
+            leftLayout.childForceExpandHeight = false;
+
+            AddIcon(left, SpriteUtil.ShellSprite(), 82f, 72f);
+            AddText(left, font, material, "1", 40f);
+
+            AddText(row, font, material, "=", 40f);
+
+            // Right group: money icon + "1,000" kept tight together.
+            RectTransform right = UiFactory.Panel("Right", row);
+            right.sizeDelta = new Vector2(252f, 100f);
+            var rightLayout = right.gameObject.AddComponent<HorizontalLayoutGroup>();
+            rightLayout.childAlignment = TextAnchor.MiddleCenter;
+            rightLayout.spacing = 2f;
+            rightLayout.childControlWidth = false;
+            rightLayout.childControlHeight = false;
+            rightLayout.childForceExpandWidth = false;
+            rightLayout.childForceExpandHeight = false;
+
+            AddIcon(right, MoneyIcon(), 80f, 80f);
+            AddText(right, font, material, "1,000", 170f);
 
             Sprite shell = SpriteUtil.ShellSprite();
-            Sprite cash = CashIcon(menu);
-            Plugin.Log.LogInfo($"Rate row icons: shell='{(shell != null ? shell.name : "MISSING")}' cash='{(cash != null ? cash.name : "MISSING")}'");
+            Sprite money = MoneyIcon();
+            Plugin.Log.LogInfo($"Rate row icons: shell='{(shell != null ? shell.name : "MISSING")}' money='{(money != null ? money.name : "MISSING")}'");
         }
 
         private static void AddIcon(Transform parent, Sprite sprite, float width, float height)
@@ -238,16 +262,11 @@ namespace CCFR.ShellExchange
             tmp.fontStyle = FontStyles.Bold;
         }
 
-        private static Sprite CashIcon(StartMenuScript menu)
+        private static Sprite MoneyIcon()
         {
-            Sprite bill = SpriteUtil.Named("cash_bill_1");
-            if (bill != null)
-            {
-                return bill;
-            }
-
-            return SpriteUtil.Named("Gold cash_0")
-                ?? SpriteUtil.Named("cash_bill_2")
+            return SpriteUtil.Named("moneyicon")
+                ?? SpriteUtil.Named("cash_bill_1")
+                ?? SpriteUtil.Named("Gold cash_0")
                 ?? SpriteUtil.Named("gameover_cash_icons_0");
         }
 
@@ -264,8 +283,8 @@ namespace CCFR.ShellExchange
                 name = "CCFR_ShellExchange_Text"
             };
 
-            material.SetColor("_FaceColor", Color.black);
-            material.SetColor("_OutlineColor", Color.white);
+            material.SetColor("_FaceColor", new Color(0.3529f, 0f, 0.4549f, 1f));   // #5A0074
+            material.SetColor("_OutlineColor", new Color(0.8392f, 0.8627f, 1f, 1f)); // #D6DCFF
             material.SetFloat("_OutlineWidth", 0.22f);
             material.SetFloat("_OutlineSoftness", 0f);
             material.EnableKeyword("OUTLINE_ON");
