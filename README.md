@@ -23,6 +23,15 @@ cash counter.
 Conversions are saved through the game's own save routine (`glov.Save`) and are
 never applied outside the main menu.
 
+## Credits
+
+- **Artwork and game:** [Gonzossm](https://www.gonzossm.com/)
+- **Mod code:** Reznolf
+
+The shell, cash and button artwork in this mod and in `icons/` is the original
+work of [Gonzossm](https://www.gonzossm.com/) and is included for personal
+modding use only.
+
 ## Requirements
 
 - Caravan Carnage: Fruity Road (Unity 6000.3.8f1, Mono)
@@ -84,14 +93,14 @@ pwsh scripts/deploy.ps1
 ## How it works (short version)
 | Piece | Game API used |
 |---|---|
-| Button placement | clone of `StartMenuScript.pauseSettingsBtn_obj`, offset +1.95 units |
-| Icon | `golden_shell` sprite |
+| Button placement | centered between the settings gear and the Play button (screen-space mid-gap) |
+| Icon | embedded `exchange_button.png` (Gonzossm's artwork) |
 | Click handler | the cloned button's `BTN` plate |
 | Balance fields | `glov.cc.playerGold`, `glov.cc.playerShells` |
 | Animation | `urov.SpawnFlyingCash(WhichIconsToShow.shells, …)`, `urov.SpawnFlyingNumber(…)` |
 | Sounds | `zvukRef.Play_MenuClick`, `Play_PickUp_Shell_Sound`, `Play_PickUp_Coin_Sound` |
 | Save | `glov.cc.Save(ignoreSaveTimer: true)` |
-| Hook | Harmony postfix on `StartMenuScript.DoAspectRatioStuff` / `OnEnable` |
+| Hook | Harmony postfix on `StartMenuScript.DoAspectRatioStuff` / `OnEnable`, plus Escape suppression |
 
 More detail in [`docs/game-notes.md`](docs/game-notes.md) and
 [`docs/ui-map.md`](docs/ui-map.md).
@@ -121,7 +130,6 @@ The log is at `<game>\BepInEx\LogOutput.log`.
 - The confirmation window is built at runtime from the game's own sprites/fonts.
   It is not in the game's original style sheets, so tiny visual differences are
   expected.
-- Pressing Escape while the confirmation is open does nothing; use Cancel or
-  click outside the window.
+- Pressing Escape while the confirmation is open closes it (Cancel).
 - A game update that renames `StartMenuScript`, `glov` or `urov` members will
   break the mod (it will log an error and simply not add the button).

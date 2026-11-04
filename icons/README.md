@@ -36,5 +36,6 @@ The remaining files (`Cashtruck`, `Cashturn`, `Slider_cash_*`, `Deliver_trash_fo
 `Got_enough_cash_for_new_gun`, `New_mount_more_money`) also matched the money filter
 but are UI/text art rather than currency icons.
 
-> These are assets from the game. Keep them for personal/modding use; do not
-> redistribute them as your own artwork.
+> These are assets from the game. They are the original artwork of
+> [Gonzossm](https://www.gonzossm.com/); keep them for personal/modding use and
+> do not redistribute them as your own artwork.
