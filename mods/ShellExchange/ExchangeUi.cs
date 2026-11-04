@@ -1,0 +1,253 @@
+using System;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+
+namespace CCFR.ShellExchange
+{
+    internal static class ExchangeUi
+    {
+        internal const int GoldPerShell = 1000;
+
+        private const float HorizontalOffset = 1.95f;
+
+        private static StartMenuScript _menu;
+        private static GameObject _button;
+        private static Transform _source;
+        private static bool _visualApplied;
+        private static bool _busy;
+
+        internal static GameObject ButtonObject => _button;
+
+        internal static bool Busy
+        {
+            get => _busy;
+            set => _busy = value;
+        }
+
+        public static void Ensure(StartMenuScript menu)
+        {
+            if (menu == null || menu.pauseSettingsBtn_obj == null || glov.cc == null)
+            {
+                return;
+            }
+
+            _menu = menu;
+
+            if (_button != null && _source == menu.pauseSettingsBtn_obj.transform)
+            {
+                Sync();
+                return;
+            }
+
+            Create(menu);
+        }
+
+        private static void Create(StartMenuScript menu)
+        {
+            Transform source = menu.pauseSettingsBtn_obj.transform;
+            Transform parent = source.parent;
+            if (parent == null)
+            {
+                return;
+            }
+
+            if (_button != null)
+            {
+                UnityEngine.Object.Destroy(_button);
+            }
+
+            _source = source;
+            _visualApplied = false;
+            _button = UnityEngine.Object.Instantiate(menu.pauseSettingsBtn_obj, parent);
+            _button.name = "SHELL_EXCHANGE_BTN";
+
+            ApplyVisual();
+            StripInteractions();
+
+            Transform plate = _button.transform.Find("rect_holder/BTN");
+            if (plate != null)
+            {
+                var image = plate.GetComponent<Image>();
+                if (image != null)
+                {
+                    image.raycastTarget = true;
+                }
+
+                var button = plate.GetComponent<Button>() ?? plate.gameObject.AddComponent<Button>();
+                button.enabled = true;
+                button.targetGraphic = image;
+                button.onClick = new Button.ButtonClickedEvent();
+                button.onClick.AddListener(OnClicked);
+
+                ColorBlock colors = button.colors;
+                colors.normalColor = Color.white;
+                colors.highlightedColor = new Color(1f, 0.95f, 0.7f, 1f);
+                colors.pressedColor = new Color(0.8f, 0.7f, 0.4f, 1f);
+                button.colors = colors;
+            }
+            else
+            {
+                Plugin.Log.LogError("Could not find rect_holder/BTN in the cloned settings button");
+            }
+
+            var driver = menu.gameObject.GetComponent<ShellExchangeDriver>();
+            if (driver == null)
+            {
+                driver = menu.gameObject.AddComponent<ShellExchangeDriver>();
+            }
+
+            driver.Bind(menu, _button.transform, source);
+            Sync();
+
+            Plugin.Log.LogInfo($"Shell exchange button created next to the settings button (localPos={_button.transform.localPosition}, scale={_button.transform.localScale})");
+            Plugin.Log.LogInfo($"Main menu balances: gold={glov.cc.playerGold} shells={glov.cc.playerShells}");
+        }
+
+        private static void ApplyVisual()
+        {
+            Sprite shell = SpriteUtil.ShellSprite();
+            if (shell == null)
+            {
+                return;
+            }
+
+            foreach (string path in new[] { "rect_holder/img (1)", "rect_holder/img (1)_1" })
+            {
+                Transform node = _button.transform.Find(path);
+                if (node == null)
+                {
+                    continue;
+                }
+
+                var image = node.GetComponent<Image>();
+                if (image == null)
+                {
+                    continue;
+                }
+
+                image.sprite = shell;
+                image.type = Image.Type.Simple;
+                image.preserveAspect = true;
+
+                if (node is RectTransform rect)
+                {
+                    rect.sizeDelta = new Vector2(1.50f, 1.30f);
+                }
+            }
+
+            _visualApplied = true;
+        }
+
+        private static void StripInteractions()
+        {
+            foreach (Selectable selectable in _button.GetComponentsInChildren<Selectable>(true))
+            {
+                selectable.enabled = false;
+            }
+
+            foreach (EventTrigger trigger in _button.GetComponentsInChildren<EventTrigger>(true))
+            {
+                UnityEngine.Object.Destroy(trigger);
+            }
+
+            foreach (Graphic graphic in _button.GetComponentsInChildren<Graphic>(true))
+            {
+                graphic.raycastTarget = false;
+            }
+        }
+
+        private static void Sync()
+        {
+            if (_button == null || _source == null)
+            {
+                return;
+            }
+
+            if (!_visualApplied)
+            {
+                ApplyVisual();
+            }
+
+            Vector3 p = _source.localPosition;
+            _button.transform.localPosition = new Vector3(p.x + HorizontalOffset, p.y, p.z);
+            _button.transform.localRotation = _source.localRotation;
+            _button.transform.localScale = _source.localScale;
+        }
+
+        private static void OnClicked()
+        {
+            if (_busy || _menu == null || glov.cc == null)
+            {
+                return;
+            }
+
+            glov.cc.zvukRef.Play_MenuClick();
+
+            int shells = glov.cc.playerShells;
+            if (shells <= 0)
+            {
+                FXSpawner.SaySomethingOnMsgBlob("No golden shells to exchange", 1.2f, knop.MsgImgNames.none, false, 0);
+                return;
+            }
+
+            long requested = (long)shells * GoldPerShell;
+            long headroom = Int32.MaxValue - (long)glov.cc.playerGold;
+            int gain = (int)Math.Min(requested, Math.Max(0L, headroom));
+
+            _busy = true;
+            ConfirmDialog.Show(_menu, shells, gain, confirmed =>
+            {
+                if (confirmed && _menu != null)
+                {
+                    _menu.StartCoroutine(ExchangeFlow.Run(_menu, shells, gain));
+                }
+                else
+                {
+                    _busy = false;
+                }
+            });
+        }
+    }
+
+    internal sealed class ShellExchangeDriver : MonoBehaviour
+    {
+        private StartMenuScript _menu;
+        private Transform _button;
+        private Transform _source;
+
+        public void Bind(StartMenuScript menu, Transform button, Transform source)
+        {
+            _menu = menu;
+            _button = button;
+            _source = source;
+        }
+
+        private void LateUpdate()
+        {
+            if (_menu == null || _button == null || _source == null)
+            {
+                return;
+            }
+
+            bool visible = _menu.isActiveAndEnabled
+                && _menu.gameObject.activeInHierarchy
+                && _source.gameObject.activeInHierarchy;
+
+            if (_button.gameObject.activeSelf != visible)
+            {
+                _button.gameObject.SetActive(visible);
+            }
+
+            if (!visible)
+            {
+                return;
+            }
+
+            Vector3 p = _source.localPosition;
+            _button.localPosition = new Vector3(p.x + 1.95f, p.y, p.z);
+            _button.localRotation = _source.localRotation;
+            _button.localScale = _source.localScale;
+        }
+    }
+}

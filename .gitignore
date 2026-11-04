@@ -1,0 +1,13 @@
+# Build output
+bin/
+obj/
+.vs/
+*.user
+
+# Local-only artifacts (backups, downloaded loaders, game reference copies)
+backups/
+vendor/
+refs/
+
+# Logs
+*.log
