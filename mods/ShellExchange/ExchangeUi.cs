@@ -10,7 +10,7 @@ namespace CCFR.ShellExchange
     {
         internal const int GoldPerShell = 1000;
 
-        private const float ArtVisibleHeight = 1.10f;
+        private const float ArtVisibleHeight = 1.24f;
 
         // Small extra gap to the right of the settings button.
         private const float RightNudge = 0.28f;
@@ -310,12 +310,120 @@ namespace CCFR.ShellExchange
         private StartMenuScript _menu;
         private Transform _button;
         private Transform _source;
+        private Transform _settingsCenter;
+        private Transform _playCenter;
+        private Transform _bannerCenter;
+        private Camera _camera;
+
+        private Camera ResolveCamera()
+        {
+            if (glov.cc != null && glov.cc.gui_camera_ref != null)
+            {
+                _camera = glov.cc.gui_camera_ref;
+                return _camera;
+            }
+
+            if (_camera != null && _camera.name == "GUI_CAMERA")
+            {
+                return _camera;
+            }
+
+            foreach (Camera camera in Camera.allCameras)
+            {
+                if (camera.name == "GUI_CAMERA")
+                {
+                    return _camera = camera;
+                }
+            }
+
+            return null;
+        }
 
         public void Bind(StartMenuScript menu, Transform button, Transform source)
         {
             _menu = menu;
             _button = button;
             _source = source;
+            _settingsCenter = source != null ? source.Find("rect_holder") : null;
+            _bannerCenter = button != null ? button.Find("rect_holder") : null;
+
+            Transform play = null;
+            if (menu != null)
+            {
+                if (menu.playPressed != null)
+                {
+                    // playPressed is the reel + PLAY artwork (play-2).
+                    play = menu.playPressed.transform;
+                }
+                else if (menu.playDefault != null)
+                {
+                    play = menu.playDefault.transform;
+                }
+            }
+
+            _playCenter = play;
+
+            if (_settingsCenter == null || _playCenter == null || _bannerCenter == null)
+            {
+                Plugin.Log.LogWarning("Could not resolve settings/play anchors; using fixed offset");
+            }
+        }
+
+        private float SettingsRightEdge(Camera cam, float fallbackCenter)
+        {
+            Transform icon = _source != null ? _source.Find("rect_holder/img (1)") : null;
+            if (icon is RectTransform rect)
+            {
+                var corners = new Vector3[4];
+                rect.GetWorldCorners(corners);
+                float max = float.MinValue;
+                foreach (Vector3 corner in corners)
+                {
+                    float x = cam.WorldToScreenPoint(corner).x;
+                    if (x > max)
+                    {
+                        max = x;
+                    }
+                }
+
+                return max;
+            }
+
+            return fallbackCenter + 45f;
+        }
+
+        private float PlayLeftEdge(Camera cam)
+        {
+            if (_playCenter == null)
+            {
+                return float.MaxValue;
+            }
+
+            Renderer renderer = _playCenter.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                Bounds bounds = renderer.bounds;
+                return cam.WorldToScreenPoint(new Vector3(bounds.min.x, bounds.center.y, bounds.center.z)).x;
+            }
+
+            if (_playCenter is RectTransform rect)
+            {
+                var corners = new Vector3[4];
+                rect.GetWorldCorners(corners);
+                float min = float.MaxValue;
+                foreach (Vector3 corner in corners)
+                {
+                    float x = cam.WorldToScreenPoint(corner).x;
+                    if (x < min)
+                    {
+                        min = x;
+                    }
+                }
+
+                return min;
+            }
+
+            return cam.WorldToScreenPoint(_playCenter.position).x;
         }
 
         private void LateUpdate()
@@ -339,8 +447,37 @@ namespace CCFR.ShellExchange
                 return;
             }
 
-            Vector3 p = _source.localPosition;
-            _button.localPosition = new Vector3(p.x + ExchangeUi.HorizontalOffset, p.y, p.z);
+            if (_settingsCenter != null && _playCenter != null && _bannerCenter != null)
+            {
+                // Center the banner's visible center horizontally between the
+                // settings gear and the Play button in SCREEN space, then project
+                // back at the settings row's depth (the GUI camera is perspective).
+                Camera cam = ResolveCamera();
+                Vector3 settings = _settingsCenter.position;
+                Vector3 play = _playCenter.position;
+                Vector3 target;
+
+                if (cam != null)
+                {
+                    Vector3 settingsScreen = cam.WorldToScreenPoint(settings);
+                    float settingsRight = SettingsRightEdge(cam, settingsScreen.x);
+                    float playLeft = PlayLeftEdge(cam);
+                    float midX = (settingsRight + playLeft) * 0.5f;
+                    target = cam.ScreenToWorldPoint(new Vector3(midX, settingsScreen.y, settingsScreen.z));
+                }
+                else
+                {
+                    target = new Vector3((settings.x + play.x) * 0.5f, settings.y, settings.z);
+                }
+
+                _button.position += target - _bannerCenter.position;
+            }
+            else
+            {
+                Vector3 p = _source.localPosition;
+                _button.localPosition = new Vector3(p.x + ExchangeUi.HorizontalOffset, p.y, p.z);
+            }
+
             _button.localRotation = _source.localRotation;
             _button.localScale = _source.localScale;
         }
