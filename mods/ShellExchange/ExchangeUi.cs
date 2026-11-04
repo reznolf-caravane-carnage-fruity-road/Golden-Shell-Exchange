@@ -10,7 +10,9 @@ namespace CCFR.ShellExchange
     {
         internal const int GoldPerShell = 1000;
 
-        private const float HorizontalOffset = 1.95f;
+        private const float ArtVisibleHeight = 1.10f;
+
+        internal static float HorizontalOffset = 1.95f;
 
         private static StartMenuScript _menu;
         private static GameObject _button;
@@ -107,13 +109,38 @@ namespace CCFR.ShellExchange
             Plugin.Log.LogInfo($"Main menu balances: gold={glov.cc.playerGold} shells={glov.cc.playerShells}");
         }
 
+        private static Sprite CurrentArt()
+        {
+            return SpriteUtil.ExchangeButton() ?? SpriteUtil.ShellSprite();
+        }
+
+        private static Vector2 ArtSize(Sprite art)
+        {
+            if (art == null)
+            {
+                return new Vector2(1.22f, 1.10f);
+            }
+
+            float fraction = SpriteUtil.ExchangeButtonHeightFraction;
+            if (fraction <= 0.01f)
+            {
+                fraction = 1f;
+            }
+
+            float height = ArtVisibleHeight / fraction;
+            float aspect = art.rect.height > 0f ? art.rect.width / art.rect.height : 1f;
+            return new Vector2(height * aspect, height);
+        }
+
         private static void ApplyVisual()
         {
-            Sprite art = SpriteUtil.ExchangeButton() ?? SpriteUtil.ShellSprite();
+            Sprite art = CurrentArt();
             if (art == null)
             {
                 return;
             }
+
+            Vector2 size = ArtSize(art);
 
             foreach (string path in new[] { "rect_holder/img (1)", "rect_holder/img (1)_1" })
             {
@@ -135,12 +162,11 @@ namespace CCFR.ShellExchange
 
                 if (node is RectTransform rect)
                 {
-                    // The art has ~7% transparent padding; scale the rect so the
-                    // visible shell+bills matches the settings gear (1.22 x 1.10).
-                    rect.sizeDelta = new Vector2(1.31f, 1.19f);
+                    rect.sizeDelta = size;
                 }
             }
 
+            HorizontalOffset = 0.61f + size.x * 0.5f + 0.06f;
             _visualApplied = true;
         }
 
@@ -159,14 +185,22 @@ namespace CCFR.ShellExchange
             }
 
             RectTransform glowRt = UiFactory.Panel("ShellGlow", holder);
-            glowRt.sizeDelta = new Vector2(1.31f, 1.19f);
+            Sprite art = CurrentArt();
+            Vector2 size = ArtSize(art);
+            glowRt.sizeDelta = size;
             glowRt.anchoredPosition = Vector2.zero;
 
             var glowImage = glowRt.gameObject.AddComponent<Image>();
-            glowImage.sprite = SpriteUtil.ExchangeButton() ?? SpriteUtil.ShellSprite();
+            glowImage.sprite = art;
             glowImage.preserveAspect = false;
             glowImage.raycastTarget = false;
             glowImage.color = new Color(1f, 1f, 1f, 0f);
+
+            if (plate is RectTransform plateRect)
+            {
+                plateRect.sizeDelta = new Vector2(size.x + 0.24f, size.y + 0.24f);
+                plateRect.anchoredPosition = Vector2.zero;
+            }
 
             int uiLayer = LayerMask.NameToLayer("UI");
             if (uiLayer >= 0)
@@ -303,7 +337,7 @@ namespace CCFR.ShellExchange
             }
 
             Vector3 p = _source.localPosition;
-            _button.localPosition = new Vector3(p.x + 1.95f, p.y, p.z);
+            _button.localPosition = new Vector3(p.x + ExchangeUi.HorizontalOffset, p.y, p.z);
             _button.localRotation = _source.localRotation;
             _button.localScale = _source.localScale;
         }

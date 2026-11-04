@@ -11,6 +11,8 @@ namespace CCFR.ShellExchange
         private static bool _shellLookupDone;
         private static Sprite _exchangeButton;
 
+        internal static float ExchangeButtonHeightFraction = 1f;
+
         public static Sprite ExchangeButton()
         {
             if (_exchangeButton != null)
@@ -62,7 +64,38 @@ namespace CCFR.ShellExchange
                         100f);
                     _exchangeButton.name = "exchange_button";
 
-                    Plugin.Log.LogInfo($"Custom exchange button sprite loaded ({texture.width}x{texture.height})");
+                    // Measure the opaque bounds so the art can be sized to the same
+                    // visible height as the settings button regardless of padding.
+                    Color32[] pixels = texture.GetPixels32();
+                    int minX = texture.width;
+                    int minY = texture.height;
+                    int maxX = -1;
+                    int maxY = -1;
+                    for (int y = 0; y < texture.height; y++)
+                    {
+                        int row = y * texture.width;
+                        for (int x = 0; x < texture.width; x++)
+                        {
+                            if (pixels[row + x].a <= 8)
+                            {
+                                continue;
+                            }
+
+                            if (x < minX) minX = x;
+                            if (x > maxX) maxX = x;
+                            if (y < minY) minY = y;
+                            if (y > maxY) maxY = y;
+                        }
+                    }
+
+                    if (maxX >= minX && maxY >= minY)
+                    {
+                        ExchangeButtonHeightFraction = (maxY - minY + 1) / (float)texture.height;
+                    }
+
+                    Plugin.Log.LogInfo(
+                        $"Custom exchange button sprite loaded ({texture.width}x{texture.height}, " +
+                        $"visible height fraction={ExchangeButtonHeightFraction:0.###})");
                 }
             }
             catch (Exception e)
