@@ -109,8 +109,8 @@ namespace CCFR.ShellExchange
 
         private static void ApplyVisual()
         {
-            Sprite shell = SpriteUtil.ShellSprite();
-            if (shell == null)
+            Sprite art = SpriteUtil.ExchangeButton() ?? SpriteUtil.ShellSprite();
+            if (art == null)
             {
                 return;
             }
@@ -129,13 +129,15 @@ namespace CCFR.ShellExchange
                     continue;
                 }
 
-                image.sprite = shell;
+                image.sprite = art;
                 image.type = Image.Type.Simple;
-                image.preserveAspect = true;
+                image.preserveAspect = false;
 
                 if (node is RectTransform rect)
                 {
-                    rect.sizeDelta = new Vector2(1.50f, 1.30f);
+                    // The art has ~7% transparent padding; scale the rect so the
+                    // visible shell+bills matches the settings gear (1.22 x 1.10).
+                    rect.sizeDelta = new Vector2(1.31f, 1.19f);
                 }
             }
 
@@ -157,12 +159,12 @@ namespace CCFR.ShellExchange
             }
 
             RectTransform glowRt = UiFactory.Panel("ShellGlow", holder);
-            glowRt.sizeDelta = new Vector2(1.5f, 1.3f);
+            glowRt.sizeDelta = new Vector2(1.31f, 1.19f);
             glowRt.anchoredPosition = Vector2.zero;
 
             var glowImage = glowRt.gameObject.AddComponent<Image>();
-            glowImage.sprite = SpriteUtil.ShellSprite();
-            glowImage.preserveAspect = true;
+            glowImage.sprite = SpriteUtil.ExchangeButton() ?? SpriteUtil.ShellSprite();
+            glowImage.preserveAspect = false;
             glowImage.raycastTarget = false;
             glowImage.color = new Color(1f, 1f, 1f, 0f);
 
