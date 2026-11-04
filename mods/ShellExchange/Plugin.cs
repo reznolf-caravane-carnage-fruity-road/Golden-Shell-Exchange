@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -23,7 +24,14 @@ namespace CCFR.ShellExchange
 
             try
             {
-                Harmony.CreateAndPatchAll(typeof(StartMenuPatch), Guid);
+                var harmony = new Harmony(Guid);
+                harmony.PatchAll(Assembly.GetExecutingAssembly());
+
+                foreach (MethodBase method in harmony.GetPatchedMethods())
+                {
+                    Log.LogInfo($"Patched: {method.DeclaringType?.FullName}.{method.Name}");
+                }
+
                 Log.LogInfo("Harmony patches applied");
             }
             catch (Exception e)

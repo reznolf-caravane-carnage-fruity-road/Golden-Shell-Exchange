@@ -13,6 +13,9 @@ namespace CCFR.ShellExchange
         private static Action<bool> _callback;
         private static StartMenuScript _menu;
 
+        internal static bool IsOpen => _open;
+        internal static float ClosedAt = -999f;
+
         public static void Show(StartMenuScript menu, int shells, int gain, Action<bool> callback)
         {
             if (_open)
@@ -48,6 +51,9 @@ namespace CCFR.ShellExchange
                 typeof(CanvasScaler),
                 typeof(GraphicRaycaster));
             _root = canvasGo;
+
+            var escapeCloser = canvasGo.AddComponent<EscapeCloser>();
+            escapeCloser.Bind(() => Close(false));
 
             int uiLayer = LayerMask.NameToLayer("UI");
             if (uiLayer >= 0)
@@ -343,6 +349,7 @@ namespace CCFR.ShellExchange
                 return;
             }
 
+            ClosedAt = Time.unscaledTime;
             _open = false;
             Action<bool> callback = _callback;
             _callback = null;

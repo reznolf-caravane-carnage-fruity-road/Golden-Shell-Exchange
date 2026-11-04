@@ -1,4 +1,5 @@
 using HarmonyLib;
+using UnityEngine;
 
 namespace CCFR.ShellExchange
 {
@@ -34,6 +35,20 @@ namespace CCFR.ShellExchange
             {
                 Plugin.Log.LogError("ExchangeUi.Ensure (OnEnable) failed: " + e);
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(knop), "GoToSettings")]
+    internal static class KnopEscapePatch
+    {
+        [HarmonyPrefix]
+        private static bool Prefix()
+        {
+            // While the exchange dialog is open (or shortly after it closes on
+            // Escape), swallow the game's Escape/pause handler so the pause menu
+            // cannot open behind or after the dialog.
+            float sinceClose = Time.unscaledTime - ConfirmDialog.ClosedAt;
+            return !(ConfirmDialog.IsOpen || sinceClose < 0.25f);
         }
     }
 }

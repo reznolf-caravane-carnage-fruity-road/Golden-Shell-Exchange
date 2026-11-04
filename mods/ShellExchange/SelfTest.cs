@@ -35,6 +35,7 @@ namespace CCFR.ShellExchange
             {
                 Diag.Ui();
                 ConfirmDialog.Show(menu, shells, gain, ok => Plugin.Log.LogInfo($"[PREVIEW] closed={ok}"));
+
                 float seconds = 1.5f;
                 string overrideSeconds = System.Environment.GetEnvironmentVariable("CCFR_SHELLEXCHANGE_PREVIEW_SECONDS");
                 if (!string.IsNullOrEmpty(overrideSeconds) && float.TryParse(overrideSeconds, out float parsed))
