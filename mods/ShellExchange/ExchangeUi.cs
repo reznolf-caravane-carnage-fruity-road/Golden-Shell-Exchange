@@ -268,7 +268,6 @@ namespace CCFR.ShellExchange
             int shells = glov.cc.playerShells;
             if (shells <= 0)
             {
-                FXSpawner.SaySomethingOnMsgBlob("No golden shells to exchange", 1.2f, knop.MsgImgNames.none, false, 0);
                 return;
             }
 
@@ -314,6 +313,12 @@ namespace CCFR.ShellExchange
         private Transform _playCenter;
         private Transform _bannerCenter;
         private Camera _camera;
+        private Button _clickButton;
+        private Image _icon;
+        private Image _shadow;
+        private ClickBounce _bounce;
+        private bool _stateInitialized;
+        private bool _enabledState;
 
         private Camera ResolveCamera()
         {
@@ -346,6 +351,16 @@ namespace CCFR.ShellExchange
             _source = source;
             _settingsCenter = source != null ? source.Find("rect_holder") : null;
             _bannerCenter = button != null ? button.Find("rect_holder") : null;
+
+            Transform plate = button != null ? button.Find("rect_holder/BTN") : null;
+            _clickButton = plate != null ? plate.GetComponent<Button>() : null;
+            _bounce = plate != null ? plate.GetComponent<ClickBounce>() : null;
+
+            Transform icon = button != null ? button.Find("rect_holder/img (1)") : null;
+            _icon = icon != null ? icon.GetComponent<Image>() : null;
+
+            Transform shadow = button != null ? button.Find("rect_holder/img (1)_1") : null;
+            _shadow = shadow != null ? shadow.GetComponent<Image>() : null;
 
             Transform play = null;
             if (menu != null)
@@ -480,6 +495,42 @@ namespace CCFR.ShellExchange
 
             _button.localRotation = _source.localRotation;
             _button.localScale = _source.localScale;
+
+            int shells = glov.cc != null ? glov.cc.playerShells : 0;
+            bool enabled = shells > 0;
+            if (!_stateInitialized || enabled != _enabledState)
+            {
+                _stateInitialized = true;
+                _enabledState = enabled;
+                ApplyEnabled(enabled);
+            }
+        }
+
+        private void ApplyEnabled(bool enabled)
+        {
+            Plugin.Log.LogInfo($"Exchange button {(enabled ? "enabled" : "disabled (no shells)")}");
+
+            if (_clickButton != null)
+            {
+                _clickButton.interactable = enabled;
+            }
+
+            if (_bounce != null)
+            {
+                _bounce.enabled = enabled;
+            }
+
+            if (_icon != null)
+            {
+                _icon.color = enabled ? Color.white : new Color(0.45f, 0.45f, 0.45f, 0.6f);
+            }
+
+            if (_shadow != null)
+            {
+                _shadow.color = enabled
+                    ? new Color(0f, 0f, 0f, 0.455f)
+                    : new Color(0f, 0f, 0f, 0.18f);
+            }
         }
     }
 }

@@ -42,12 +42,6 @@ namespace CCFR.ShellExchange
                 SetShells(menu, 0);
 
                 cc.zvukRef.Play_PickUp_Coin_Sound();
-                FXSpawner.SaySomethingOnMsgBlob(
-                    "+" + gain.ToString("n0") + " CASH",
-                    1.2f,
-                    knop.MsgImgNames.none,
-                    false,
-                    0);
 
                 cc.Save(ignoreSaveTimer: true);
                 menu.UpdateCashBox();

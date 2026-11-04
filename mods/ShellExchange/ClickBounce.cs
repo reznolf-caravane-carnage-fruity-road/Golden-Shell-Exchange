@@ -65,9 +65,24 @@ namespace CCFR.ShellExchange
             }
         }
 
-        private void Update()
+        private void OnDisable()
         {
-            if (_target == null)
+            if (_target != null)
+            {
+                _target.localScale = _baseScale;
+            }
+
+            if (_glow != null)
+            {
+                _glowColor.a = 0f;
+                _glow.color = _glowColor;
+            }
+
+            _state = 0;
+        }
+
+        private void Update()
+        {            if (_target == null)
             {
                 return;
             }
