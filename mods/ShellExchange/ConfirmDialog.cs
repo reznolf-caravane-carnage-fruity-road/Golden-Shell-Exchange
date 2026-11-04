@@ -99,7 +99,7 @@ namespace CCFR.ShellExchange
             panelImage.type = panelSprite != null && panelSprite.border.sqrMagnitude > 0.01f
                 ? Image.Type.Sliced
                 : Image.Type.Simple;
-            panelImage.color = new Color(1f, 0.82f, 0.42f, 1f);
+            panelImage.color = Color.white;
             panelImage.raycastTarget = true;
 
             TMP_FontAsset font = menu.goldTXT != null ? menu.goldTXT.font : null;
@@ -107,16 +107,21 @@ namespace CCFR.ShellExchange
                 font,
                 menu.goldTXT != null ? menu.goldTXT.fontSharedMaterial : null);
 
-            UiFactory.Text(
+            TextMeshProUGUI title = UiFactory.Text(
                 "Title",
                 panel,
                 font,
                 material,
                 "EXCHANGE GOLDEN SHELLS?",
-                46f,
+                60f,
                 TextAlignmentOptions.Center,
-                new Vector2(790f, 90f),
+                new Vector2(820f, 90f),
                 new Vector2(0f, 175f));
+            title.enableAutoSizing = true;
+            title.fontSizeMin = 46f;
+            title.fontSizeMax = 64f;
+
+            BuildRateRow(panel, menu, font, material);
 
             UiFactory.Text(
                 "Body",
@@ -124,12 +129,10 @@ namespace CCFR.ShellExchange
                 font,
                 material,
                 $"Convert {shells:n0} golden shells\ninto ${gain:n0} cash?",
-                38f,
+                54f,
                 TextAlignmentOptions.Center,
-                new Vector2(760f, 150f),
-                new Vector2(0f, 55f));
-
-            BuildRateRow(panel, menu, font, material);
+                new Vector2(820f, 150f),
+                new Vector2(0f, -40f));
 
             var runner = canvasGo.AddComponent<DelayRunner>();
             bool closing = false;
@@ -157,9 +160,9 @@ namespace CCFR.ShellExchange
                 font,
                 material,
                 "EXCHANGE",
-                new Vector2(-190f, -185f),
-                new Vector2(340f, 96f),
-                new Color(0.55f, 0.9f, 0.55f, 1f),
+                new Vector2(-200f, -190f),
+                new Vector2(360f, 100f),
+                new Color(0.55f, 1f, 0.55f, 1f),
                 () => Choose(true));
 
             UiFactory.Button(
@@ -168,9 +171,9 @@ namespace CCFR.ShellExchange
                 font,
                 material,
                 "CANCEL",
-                new Vector2(190f, -185f),
-                new Vector2(340f, 96f),
-                new Color(0.95f, 0.5f, 0.45f, 1f),
+                new Vector2(200f, -190f),
+                new Vector2(360f, 100f),
+                new Color(0.8f, 0.95f, 1f, 1f),
                 () => Choose(false));
 
             if (uiLayer >= 0)
@@ -187,22 +190,22 @@ namespace CCFR.ShellExchange
         private static void BuildRateRow(RectTransform panel, StartMenuScript menu, TMP_FontAsset font, Material material)
         {
             RectTransform row = UiFactory.Panel("Rate", panel);
-            row.sizeDelta = new Vector2(760f, 70f);
-            row.anchoredPosition = new Vector2(0f, -70f);
+            row.sizeDelta = new Vector2(800f, 84f);
+            row.anchoredPosition = new Vector2(0f, 80f);
 
             var layout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
             layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.spacing = 14f;
+            layout.spacing = 18f;
             layout.childControlWidth = false;
             layout.childControlHeight = false;
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = false;
 
-            AddIcon(row, SpriteUtil.ShellSprite(), 44f, 38f);
+            AddIcon(row, SpriteUtil.ShellSprite(), 62f, 54f);
             AddText(row, font, material, "1", 50f);
-            AddText(row, font, material, "=", 34f);
-            AddIcon(row, CashIcon(menu), 42f, 42f);
-            AddText(row, font, material, "1,000", 120f);
+            AddText(row, font, material, "=", 40f);
+            AddIcon(row, CashIcon(menu), 60f, 60f);
+            AddText(row, font, material, "1,000", 150f);
 
             Sprite shell = SpriteUtil.ShellSprite();
             Sprite cash = CashIcon(menu);
@@ -228,9 +231,9 @@ namespace CCFR.ShellExchange
                 font,
                 material,
                 text,
-                32f,
+                52f,
                 TextAlignmentOptions.Center,
-                new Vector2(width, 60f),
+                new Vector2(width, 84f),
                 Vector2.zero);
             tmp.fontStyle = FontStyles.Bold;
         }
