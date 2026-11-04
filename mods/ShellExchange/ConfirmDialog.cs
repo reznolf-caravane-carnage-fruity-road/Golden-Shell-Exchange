@@ -283,20 +283,42 @@ namespace CCFR.ShellExchange
                 name = "CCFR_ShellExchange_Text"
             };
 
-            material.SetColor("_FaceColor", new Color(0.3529f, 0f, 0.4549f, 1f));   // #5A0074
-            material.SetColor("_OutlineColor", new Color(0.8392f, 0.8627f, 1f, 1f)); // #D6DCFF
-            material.SetFloat("_OutlineWidth", 0.22f);
-            material.SetFloat("_OutlineSoftness", 0f);
+            Color face = HexColor(0x5A, 0x00, 0x74);     // #5A0074
+            Color outline = HexColor(0xD6, 0xDC, 0xFF);  // #D6DCFF
+
+            material.SetColor("_FaceColor", face);
+            material.SetColor("_OutlineColor", outline);
+            material.SetColor("_GlowColor", outline);
+            material.SetColor("_UnderlayColor", new Color(0f, 0f, 0f, 0f));          // no dark drop shadow
+            material.SetFloat("_OutlineWidth", 0.35f);
+            material.SetFloat("_OutlineSoftness", 0.05f);
+            material.SetFloat("_GlowInner", 0f);
+            material.SetFloat("_GlowOuter", 0.58f);
+            material.SetFloat("_GlowPower", 0.45f);
             material.EnableKeyword("OUTLINE_ON");
+            material.DisableKeyword("GLOW_ON");
+            material.DisableKeyword("UNDERLAY_ON");
 
             Color outlineColor = material.GetColor("_OutlineColor");
+            Color glowColor = material.GetColor("_GlowColor");
+            Color faceColor = material.GetColor("_FaceColor");
             float outlineWidth = material.GetFloat("_OutlineWidth");
             bool outlineOn = material.IsKeywordEnabled("OUTLINE_ON");
+            bool glowOn = material.IsKeywordEnabled("GLOW_ON");
+            bool underlayOn = material.IsKeywordEnabled("UNDERLAY_ON");
 
             Plugin.Log.LogInfo(
-                $"Dialog text material built: outlineColor={outlineColor} width={outlineWidth} outlineOn={outlineOn}");
+                $"Dialog text material built: faceColor={faceColor} outlineColor={outlineColor} glowColor={glowColor} " +
+                $"width={outlineWidth} outlineOn={outlineOn} glowOn={glowOn} underlayOn={underlayOn} " +
+                $"colorSpace={QualitySettings.activeColorSpace}");
 
             return material;
+        }
+
+        private static Color HexColor(byte r, byte g, byte b)
+        {
+            Color color = new Color32(r, g, b, 255);
+            return QualitySettings.activeColorSpace == ColorSpace.Linear ? color.linear : color;
         }
 
         private static void SetLayerRecursively(GameObject go, int layer)
