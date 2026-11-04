@@ -1,4 +1,4 @@
-# CCFR — Golden Shell Exchange
+# Golden Shell Exchange
 
 A BepInEx mod for **Caravan Carnage: Fruity Road** (Steam app `3330940`).
 
