@@ -31,6 +31,15 @@ namespace CCFR.ShellExchange
             int shells = glov.cc.playerShells;
             int gain = shells * ExchangeUi.GoldPerShell;
 
+            if (System.Environment.GetEnvironmentVariable("CCFR_SHELLEXCHANGE_PREVIEW") == "1")
+            {
+                Diag.Ui();
+                ConfirmDialog.Show(menu, shells, gain, ok => Plugin.Log.LogInfo($"[PREVIEW] closed={ok}"));
+                yield return new WaitForSeconds(1.5f);
+                ConfirmDialog.CloseForTest(false);
+                yield break;
+            }
+
             Diag.Ui();
 
             Plugin.Log.LogInfo($"[SELFTEST] before: gold={glov.cc.playerGold} shells={glov.cc.playerShells} gain={gain}");

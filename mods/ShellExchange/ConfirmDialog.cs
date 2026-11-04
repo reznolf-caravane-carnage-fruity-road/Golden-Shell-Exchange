@@ -92,7 +92,7 @@ namespace CCFR.ShellExchange
 
             Sprite panelSprite = SpriteUtil.Named("square_bubble");
             RectTransform panel = UiFactory.Panel("Window", canvasGo.transform);
-            panel.sizeDelta = new Vector2(900f, 540f);
+            panel.sizeDelta = new Vector2(960f, 620f);
             panel.anchoredPosition = Vector2.zero;
             var panelImage = panel.gameObject.AddComponent<Image>();
             panelImage.sprite = panelSprite;
@@ -113,13 +113,13 @@ namespace CCFR.ShellExchange
                 font,
                 material,
                 "EXCHANGE GOLDEN SHELLS?",
-                60f,
+                76f,
                 TextAlignmentOptions.Center,
-                new Vector2(820f, 90f),
-                new Vector2(0f, 175f));
+                new Vector2(900f, 110f),
+                new Vector2(0f, 225f));
             title.enableAutoSizing = true;
-            title.fontSizeMin = 46f;
-            title.fontSizeMax = 64f;
+            title.fontSizeMin = 60f;
+            title.fontSizeMax = 80f;
 
             BuildRateRow(panel, menu, font, material);
 
@@ -129,10 +129,10 @@ namespace CCFR.ShellExchange
                 font,
                 material,
                 $"Convert {shells:n0} golden shells\ninto ${gain:n0} cash?",
-                54f,
+                68f,
                 TextAlignmentOptions.Center,
-                new Vector2(820f, 150f),
-                new Vector2(0f, -40f));
+                new Vector2(860f, 200f),
+                new Vector2(0f, -45f));
 
             var runner = canvasGo.AddComponent<DelayRunner>();
             bool closing = false;
@@ -160,8 +160,8 @@ namespace CCFR.ShellExchange
                 font,
                 material,
                 "EXCHANGE",
-                new Vector2(-200f, -190f),
-                new Vector2(360f, 100f),
+                new Vector2(-210f, -210f),
+                new Vector2(380f, 110f),
                 new Color(0.55f, 1f, 0.55f, 1f),
                 () => Choose(true));
 
@@ -171,8 +171,8 @@ namespace CCFR.ShellExchange
                 font,
                 material,
                 "CANCEL",
-                new Vector2(200f, -190f),
-                new Vector2(360f, 100f),
+                new Vector2(210f, -210f),
+                new Vector2(380f, 110f),
                 new Color(0.8f, 0.95f, 1f, 1f),
                 () => Choose(false));
 
@@ -190,22 +190,22 @@ namespace CCFR.ShellExchange
         private static void BuildRateRow(RectTransform panel, StartMenuScript menu, TMP_FontAsset font, Material material)
         {
             RectTransform row = UiFactory.Panel("Rate", panel);
-            row.sizeDelta = new Vector2(800f, 84f);
-            row.anchoredPosition = new Vector2(0f, 80f);
+            row.sizeDelta = new Vector2(900f, 100f);
+            row.anchoredPosition = new Vector2(0f, 115f);
 
             var layout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
             layout.childAlignment = TextAnchor.MiddleCenter;
-            layout.spacing = 18f;
+            layout.spacing = 20f;
             layout.childControlWidth = false;
             layout.childControlHeight = false;
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = false;
 
-            AddIcon(row, SpriteUtil.ShellSprite(), 62f, 54f);
-            AddText(row, font, material, "1", 50f);
-            AddText(row, font, material, "=", 40f);
-            AddIcon(row, CashIcon(menu), 60f, 60f);
-            AddText(row, font, material, "1,000", 150f);
+            AddIcon(row, SpriteUtil.ShellSprite(), 78f, 68f);
+            AddText(row, font, material, "1", 60f);
+            AddText(row, font, material, "=", 44f);
+            AddIcon(row, CashIcon(menu), 76f, 76f);
+            AddText(row, font, material, "1,000", 190f);
 
             Sprite shell = SpriteUtil.ShellSprite();
             Sprite cash = CashIcon(menu);
@@ -231,26 +231,24 @@ namespace CCFR.ShellExchange
                 font,
                 material,
                 text,
-                52f,
+                64f,
                 TextAlignmentOptions.Center,
-                new Vector2(width, 84f),
+                new Vector2(width, 100f),
                 Vector2.zero);
             tmp.fontStyle = FontStyles.Bold;
         }
 
         private static Sprite CashIcon(StartMenuScript menu)
         {
-            if (menu != null && menu.cashBoxObj != null)
+            Sprite bill = SpriteUtil.Named("cash_bill_1");
+            if (bill != null)
             {
-                Transform node = menu.cashBoxObj.transform.Find("holder/mover/GOLD/ICO/mover/cashICON");
-                var renderer = node != null ? node.GetComponent<SpriteRenderer>() : null;
-                if (renderer != null && renderer.sprite != null)
-                {
-                    return renderer.sprite;
-                }
+                return bill;
             }
 
-            return SpriteUtil.Named("gameover_cash_icons_0") ?? SpriteUtil.Named("Gold cash_0");
+            return SpriteUtil.Named("Gold cash_0")
+                ?? SpriteUtil.Named("cash_bill_2")
+                ?? SpriteUtil.Named("gameover_cash_icons_0");
         }
 
         private static Material BuildTextMaterial(TMP_FontAsset font, Material source)

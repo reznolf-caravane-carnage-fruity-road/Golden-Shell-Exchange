@@ -109,7 +109,7 @@ namespace CCFR.ShellExchange
                 font,
                 material,
                 label,
-                54f,
+                64f,
                 TextAlignmentOptions.Center,
                 new Vector2(size.x - 24f, size.y - 10f),
                 Vector2.zero);
